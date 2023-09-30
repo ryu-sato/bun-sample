@@ -1,17 +1,16 @@
-# [Choice] Debian OS version: bullseye, buster
-FROM --platform=linux/amd64 mcr.microsoft.com/vscode/devcontainers/base:dev-bullseye
+FROM node:18-slim
+SHELL ["/bin/bash", "-oeux", "pipefail", "-c"]
 
-ARG USERNAME=vscode
+ARG USERNAME=node
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
 
+RUN apt-get update -y \
+    && apt-get install -y build-essential unzip curl
+
 ENV BUN_INSTALL=/bun
-RUN sudo mkdir -p ${BUN_INSTALL} \
+RUN mkdir -p ${BUN_INSTALL} \
     && curl -fsSL https://bun.sh/install | bash \
     && chown -R ${USERNAME} /bun
 
 ENV PATH=${BUN_INSTALL}/bin:${PATH}
-
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#    && apt-get -y install --no-install-recommends <your-package-list-here>
