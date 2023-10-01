@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider = "zod-prisma-types"
+  createInputTypes = false
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int   @id @default(autoincrement()) /// @zod.custom.use(z.coerce.number())
+  createdAt  DateTime @default(now())            ///
+  updatedAt  DateTime @updatedAt                 ///
+  name       String @unique                      ///
+  taskColor  String                              ///
+
+  tasks      Task[]                              ///
+
+  @@index([name])
+}
+
+model Kanban {
+  id         Int   @id @default(autoincrement()) /// @zod.custom.use(z.coerce.number())
+  createdAt  DateTime @default(now())            ///
+  updatedAt  DateTime @updatedAt                 ///
+  name       String @unique                      ///
+
+  sprints    Sprint[]                            ///
+}
+
+model Sprint {
+  id         Int   @id @default(autoincrement())                    /// @zod.custom.use(z.coerce.number())
+  createdAt  DateTime @default(now())                               ///
+  updatedAt  DateTime @updatedAt                                    ///
+  name       String                                                 ///
+  beginAt    DateTime                                               ///
+  endAt      DateTime                                               ///
+
+  swimlanes  Swimlane[]                                             ///
+  kanban     Kanban @relation(fields: [kanbanId], references: [id]) ///
+  kanbanId   Int                                                    /// @zod.custom.use(z.coerce.number())
+
+  @@index([name])
+  @@index([beginAt(sort: Asc)])
+  @@index([beginAt(sort: Asc), endAt(sort: Asc)])
+}
+
+model Swimlane {
+  id         Int   @id @default(autoincrement())                    /// @zod.custom.use(z.coerce.number())
+  createdAt  DateTime @default(now())                               ///
+  updatedAt  DateTime @updatedAt                                    ///
+  category   String                                                 ///
+  title      String                                                 ///
+  body       String?                                                ///
+  point      Int?                                                   /// @zod.custom.use(z.coerce.number().transform((n) => n === 0 ? null : n))
+
+  sprint     Sprint @relation(fields: [sprintId], references: [id]) ///
+  sprintId   Int                                                    /// @zod.custom.use(z.coerce.number())
+
+  tasks      Task[]                                                 ///
+}
+
+model Task {
+  id         Int   @id @default(autoincrement())                        /// @zod.custom.use(z.coerce.number())
+  createdAt  DateTime @default(now())                                   ///
+  updatedAt  DateTime @updatedAt                                        ///
+  title      String                                                     ///
+  body       String?                                                    ///
+  status     String @default("OPEN")                                    ///
+
+  swimlane   Swimlane @relation(fields: [swimlaneId], references: [id]) ///
+  swimlaneId Int                                                        /// @zod.custom.use(z.coerce.number())
+  assignee   User? @relation(fields: [assigneeId], references: [id])    ///
+  assigneeId Int?                                                       /// @zod.custom.use(z.coerce.number().transform((n) => n === 0 ? null : n))
+}

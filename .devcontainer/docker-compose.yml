@@ -17,6 +17,8 @@ services:
 
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
+    environment:
+      DATABASE_URL: postgresql://${DB_USERNAME:-root}:${DB_PASSWORD:-password}@db:5432/remix-sample
 
   db:
     image: postgres:15.3-bookworm
