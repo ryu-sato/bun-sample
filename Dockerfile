@@ -63,4 +63,4 @@ COPY --from=builder /app/package.json .
 COPY --from=builder /app/node_modules node_modules
 
 ENTRYPOINT ["bun"]
-CMD ["remix-serve", "./build/index.js"]
+CMD ["node_modules/.bin/remix-serve", "./build/index.js"]
